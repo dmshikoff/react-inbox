@@ -1,7 +1,17 @@
 import React from 'react'
 
+const setSquareBoxImg = messageData => {
+  if (messageData.every(data => data.selected)) return <i className="fa fa-check-square-o"></i>
+  else if (messageData.some(data => data.selected)) return <i className="fa fa-minus-square-o"></i>
+  else return <i className="fa fa-square-o"></i>
+}
 
-const Toolbar = ({ messageData, handleCheckAll, handleMarkAsRead, handleMarkAsUnread, handleApplyLabel, handleRemoveLabel, handleDelete }) => {
+const unreadMessageTotal = messageData => {
+  let unreadMessages = messageData.filter(message => (message.read === false))
+  return unreadMessages.length
+}
+
+const Toolbar = ({ messageData, handleCheckAll, messagesRequest, toggleComposeForm }) => {
   return (
     <div >
 
@@ -9,31 +19,35 @@ const Toolbar = ({ messageData, handleCheckAll, handleMarkAsRead, handleMarkAsUn
         <div className="col-md-12">
           <p className="pull-right">
             <span className="badge badge">
-            {unreadMessageTotal(messageData)}
+              {unreadMessageTotal(messageData)}
             </span>
             unread messages
           </p>
-
+          <a class="btn btn-danger"
+          onClick={event => toggleComposeForm()}
+          >
+            <i class="fa fa-plus"></i>
+          </a>
           <button className="btn btn-default"
-          onClick={event => handleCheckAll()}
+            onClick={event => handleCheckAll()}
           >
             {setSquareBoxImg(messageData)}
           </button>
 
           <button className="btn btn-default"
-          onClick={event => handleMarkAsRead()}
+            onClick={event => messagesRequest('read', { cmd: { read: true } })}
           >
             Mark As Read
           </button>
 
           <button className="btn btn-default"
-          onClick={event => handleMarkAsUnread()}
+            onClick={event => messagesRequest('read', { cmd: { read: false } })}
           >
             Mark As Unread
           </button>
 
           <select className="form-control label-select"
-          onChange={event => handleApplyLabel(event)}
+            onChange={event => messagesRequest('addLabel', { cmd: { label: event.target.value } })}
           >
             <option>Apply label</option>
             <option value="dev">dev</option>
@@ -42,7 +56,7 @@ const Toolbar = ({ messageData, handleCheckAll, handleMarkAsRead, handleMarkAsUn
           </select>
 
           <select className="form-control label-select"
-          onChange={event => handleRemoveLabel(event)}
+            onChange={event => messagesRequest('removeLabel', { cmd: { label: event.target.value } })}
           >
             <option>Remove label</option>
             <option value="dev">dev</option>
@@ -51,7 +65,7 @@ const Toolbar = ({ messageData, handleCheckAll, handleMarkAsRead, handleMarkAsUn
           </select>
 
           <button className="btn btn-default"
-          onClick={event => handleDelete()}
+            onClick={event => messagesRequest('delete')}
           >
             <i className="fa fa-trash-o"></i>
           </button>
@@ -59,20 +73,6 @@ const Toolbar = ({ messageData, handleCheckAll, handleMarkAsRead, handleMarkAsUn
       </div>
     </div>
   )
-}
-
-
-const setSquareBoxImg = messageData => {
-  if (messageData.every(data => data.selected)) return <i className="fa fa-check-square-o"></i>
-  else if (messageData.some(data => data.selected)) return <i className="fa fa-minus-square-o"></i>
-  else return <i className="fa fa-square-o"></i>
-}
-
-const unreadMessageTotal = messageData => {
-  let unreadMessages = messageData.filter(message => {
-    return message.read === false
-  })
-  return unreadMessages.length
 }
 
 

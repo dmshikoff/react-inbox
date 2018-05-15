@@ -3,6 +3,7 @@ import React, { Component } from 'react';
 import axios from 'axios'
 import Toolbar from './components/toolbar';
 import Messages from './components/Messages';
+import Compose from './components/compose';
 
 
 
@@ -14,6 +15,7 @@ class App extends Component {
     super(props)
 
     this.state = {
+      composeRendered : false,
       messages: []
     }
   }
@@ -33,8 +35,13 @@ class App extends Component {
     const idArray = this.state.messages
       .filter(message => (message.selected === true))
       .map(message => (message.id))
-
     return idArray
+  }
+
+  messagesRequest = (command, { id = this.getId(), cmd }) => {
+    const normalizedId = typeof id === 'number' ? [id] : id
+    axios.patch('http://localhost:8082/api/messages', { messageIds: normalizedId, command: command, ...cmd })
+      .then(response => this.getMessages())
   }
 
   handleSelected = (id, selected) => {
@@ -42,63 +49,9 @@ class App extends Component {
     this.setState({ messages: newmessages })
   }
 
-  handleStarred = (id) => {
-    axios.patch('http://localhost:8082/api/messages', { messageIds: [id], command: 'star' })
-      .then(response => {
-        this.getMessages()
-      })
-  }
-
-  handleDelete = () => {
-    axios.patch('http://localhost:8082/api/messages', { messageIds: this.getId(), command: 'delete' })
-      .then(response => {
-        this.getMessages()
-      })
-  }
-
-  handleMarkAsRead = () => {
-    axios.patch('http://localhost:8082/api/messages', { messageIds: this.getId(), command: 'read', read: true })
-      .then(response => {
-        this.getMessages()
-      })
-  }
-
-  handleMarkAsUnread = () => {
-    axios.patch('http://localhost:8082/api/messages', { messageIds: this.getId(), command: 'read', read: false })
-      .then(response => {
-        this.getMessages()
-      })
-  }
-
-  handleApplyLabel = event => {
-    let messageList = this.state.messages
-
-    let newmessages = messageList.map(message => {
-
-      message.selected && (message.labels = [...message.labels, event.target.value])
-
-      return message
-    })
-    this.setState({ messages: newmessages })
-  }
-
-  handleRemoveLabel = event => {
-    let messageList = this.state.messages
-
-    let newmessages = messageList.map(message => {
-
-      message.selected && (message.labels = message.labels.filter(ele => (ele !== event.target.value)))
-
-      return message
-    })
-    this.setState({ messages: newmessages })
-  }
-
   handleRead = (id) => {
     const newmessages = this.state.messages.map(ele => ele.id === id ? { ...ele, read: true } : { ...ele })
-
     this.setState({ messages: newmessages })
-
   }
 
   handleCheckAll = () => {
@@ -112,11 +65,18 @@ class App extends Component {
     this.setState({ messages: newmessages })
   }
 
+  toggleComposeForm = () => {
+    this.setState({ composeRendered: !this.state.composeRendered })
+  }
+
   render() {
     return (
       <div className='container-fluid'>
-        <Toolbar messageData={this.state.messages} handleCheckAll={this.handleCheckAll} handleMarkAsRead={this.handleMarkAsRead} handleMarkAsUnread={this.handleMarkAsUnread} handleApplyLabel={this.handleApplyLabel} handleRemoveLabel={this.handleRemoveLabel} handleDelete={this.handleDelete} />
-        <Messages messageData={this.state.messages} handleSelected={this.handleSelected} handleStarred={this.handleStarred} handleRead={this.handleRead} />
+        <Toolbar messageData={this.state.messages} handleCheckAll={this.handleCheckAll} messagesRequest={this.messagesRequest} toggleComposeForm={this.toggleComposeForm} />
+        {
+          this.state.composeRendered && <Compose />
+        }
+        <Messages messageData={this.state.messages} handleSelected={this.handleSelected} handleRead={this.handleRead} messagesRequest={this.messagesRequest} />
       </div>
     );
   }
