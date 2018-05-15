@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
-import seeds from './seeds.json';
+// import messages from './seeds.json';
+import axios from 'axios'
 import Toolbar from './components/toolbar';
 import Messages from './components/Messages';
 
@@ -13,100 +14,111 @@ class App extends Component {
     super(props)
 
     this.state = {
-        seeds: seeds
+        messages: []
     }
 }
 
-handleSelected = (id, selected) => {
-  const newSeeds = this.state.seeds.map(ele => ele.id === id ? {...ele, selected} : {...ele})
+getMessages() {
+  axios.get('http://localhost:8082/api/messages')
+  .then(data => {
+    this.setState({messages: data.data})
+  })
+}
 
-  this.setState( { seeds: newSeeds })
+componentDidMount(){
+  this.getMessages()
+}
+
+handleSelected = (id, selected) => {
+  const newmessages = this.state.messages.map(ele => ele.id === id ? {...ele, selected} : {...ele})
+
+  this.setState( { messages: newmessages })
   
 }
 
 handleStarred =(id) => {
-  const newSeeds = this.state.seeds.map(ele => ele.id === id ? {...ele, starred: !ele.starred} : {...ele})
+  const newmessages = this.state.messages.map(ele => ele.id === id ? {...ele, starred: !ele.starred} : {...ele})
 
-  this.setState( { seeds: newSeeds })
+  this.setState( { messages: newmessages })
 
 }
 
 handleRead=(id) => {
-  const newSeeds = this.state.seeds.map(ele => ele.id === id ? {...ele, read: true} : {...ele})
+  const newmessages = this.state.messages.map(ele => ele.id === id ? {...ele, read: true} : {...ele})
 
-  this.setState( { seeds: newSeeds })
+  this.setState( { messages: newmessages })
 
 }
 
 handleCheckAll=()=> {
-  const isEverythingSelected = this.state.seeds.every(data => data.selected)
-  const messageList = this.state.seeds
+  const isEverythingSelected = this.state.messages.every(data => data.selected)
+  const messageList = this.state.messages
 
-  let newSeeds = isEverythingSelected 
+  let newmessages = isEverythingSelected 
     ? messageList.map(({selected, ...message}) => ({...message})) 
     : messageList.map(message => ({...message, selected: true}))
 
-  this.setState( { seeds: newSeeds })
+  this.setState( { messages: newmessages })
 }
 
 handleMarkAsRead=()=> {
-  let messageList = this.state.seeds
+  let messageList = this.state.messages
 
-  let newSeeds = messageList.map(message => {
+  let newmessages = messageList.map(message => {
 
     return message.selected ? { ...message, read: true} : {...message}
   })
 
-  this.setState( { seeds: newSeeds })
+  this.setState( { messages: newmessages })
 }
 
 handleMarkAsUnread=()=> {
-  let messageList = this.state.seeds
+  let messageList = this.state.messages
 
-  let newSeeds = messageList.map(message => {
+  let newmessages = messageList.map(message => {
 
     return message.selected ? { ...message, read: false} : {...message}
   })
 
-  this.setState( { seeds: newSeeds })
+  this.setState( { messages: newmessages })
 }
 
 handleApplyLabel= event=> {
-  let messageList = this.state.seeds
+  let messageList = this.state.messages
 
-  let newSeeds = messageList.map(message => {
+  let newmessages = messageList.map(message => {
 
     message.selected && (message.labels = [...message.labels, event.target.value])
     
     return message
   })
-this.setState( {seeds: newSeeds})
+this.setState( {messages: newmessages})
 }
 
 handleRemoveLabel= event=> {
-  let messageList = this.state.seeds
+  let messageList = this.state.messages
 
-  let newSeeds = messageList.map(message => {
+  let newmessages = messageList.map(message => {
     
     message.selected && (message.labels = message.labels.filter(ele => (ele !== event.target.value)))
 
     return message
   })
-  this.setState( {seeds: newSeeds})
+  this.setState( {messages: newmessages})
 }
 
 handleDelete= () => {
-  let newSeeds = this.state.seeds.filter(message => {
+  let newmessages = this.state.messages.filter(message => {
     return !message.selected
   })
-  this.setState( {seeds : newSeeds})
+  this.setState( {messages : newmessages})
 }
 
   render() {
     return (
       <div className='container-fluid'>
-        <Toolbar messageData={ this.state.seeds } handleCheckAll={this.handleCheckAll} handleMarkAsRead={this.handleMarkAsRead} handleMarkAsUnread={this.handleMarkAsUnread} handleApplyLabel={this.handleApplyLabel} handleRemoveLabel={this.handleRemoveLabel} handleDelete={this.handleDelete}/>
-        <Messages messageData={ this.state.seeds } handleSelected={this.handleSelected} handleStarred={this.handleStarred} handleRead={this.handleRead}/>
+        <Toolbar messageData={ this.state.messages } handleCheckAll={this.handleCheckAll} handleMarkAsRead={this.handleMarkAsRead} handleMarkAsUnread={this.handleMarkAsUnread} handleApplyLabel={this.handleApplyLabel} handleRemoveLabel={this.handleRemoveLabel} handleDelete={this.handleDelete}/>
+        <Messages messageData={ this.state.messages } handleSelected={this.handleSelected} handleStarred={this.handleStarred} handleRead={this.handleRead}/>
       </div>
     );
   }
