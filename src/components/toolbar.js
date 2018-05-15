@@ -23,10 +23,10 @@ const Toolbar = ({ messageData, handleCheckAll, messagesRequest, toggleComposeFo
             </span>
             unread messages
           </p>
-          <a class="btn btn-danger"
+          <a className="btn btn-danger"
           onClick={event => toggleComposeForm()}
           >
-            <i class="fa fa-plus"></i>
+            <i className="fa fa-plus"></i>
           </a>
           <button className="btn btn-default"
             onClick={event => handleCheckAll()}
@@ -65,7 +65,7 @@ const Toolbar = ({ messageData, handleCheckAll, messagesRequest, toggleComposeFo
           </select>
 
           <button className="btn btn-default"
-            onClick={event => messagesRequest('delete')}
+            onClick={event => messagesRequest('delete', {})}
           >
             <i className="fa fa-trash-o"></i>
           </button>

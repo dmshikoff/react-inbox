@@ -22,9 +22,12 @@ class App extends Component {
 
   getMessages() {
     axios.get('http://localhost:8082/api/messages')
-      .then(data => {
-        this.setState({ messages: data.data })
-      })
+      .then(data => this.setState({ messages: data.data }))
+  }
+
+  postMessage = (subject, body) => {
+    axios.post('http://localhost:8082/api/messages', {subject, body})
+      .then(data => this.getMessages())
   }
 
   componentDidMount() {
@@ -74,7 +77,7 @@ class App extends Component {
       <div className='container-fluid'>
         <Toolbar messageData={this.state.messages} handleCheckAll={this.handleCheckAll} messagesRequest={this.messagesRequest} toggleComposeForm={this.toggleComposeForm} />
         {
-          this.state.composeRendered && <Compose />
+          this.state.composeRendered && <Compose postMessage={this.postMessage} />
         }
         <Messages messageData={this.state.messages} handleSelected={this.handleSelected} handleRead={this.handleRead} messagesRequest={this.messagesRequest} />
       </div>
